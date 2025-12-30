@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -11,6 +12,8 @@ faq = {
     "check-out": "O check-out é até às 11h."
 }
 
+GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwxZHJ8rYdjc2bgF9ZND37wl5JCuzbZFMJB0z08J-9CZek1O6svxWYsAR_vVEMKgiUDfQ/exec"
+
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "").lower()
@@ -19,9 +22,8 @@ def chat():
         if key in user_message:
             return jsonify({"response": answer})
 
-    # Guardar perguntas novas num ficheiro
-    with open("perguntas_novas.txt", "a", encoding="utf-8") as f:
-        f.write(user_message + "\n")
+    # Enviar pergunta nova para Google Sheets
+    requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message})
 
     return jsonify({"response": "Pode repetir a sua questão? 😊"})
 
