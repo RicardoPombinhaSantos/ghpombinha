@@ -31,7 +31,7 @@
       chatbox.innerHTML += `<div class="message user">Você: ${message}</div>`;
 
       // Enviar para o servidor Flask
-      const response = await fetch("https://ghpombinha.onrender.com", {
+      const response = await fetch("https://ghpombinha.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message })
