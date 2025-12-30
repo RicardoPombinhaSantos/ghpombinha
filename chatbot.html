@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Guesthouse Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chatbox { border: 1px solid #ccc; padding: 10px; width: 300px; height: 400px; overflow-y: auto; }
+    .message { margin: 5px 0; }
+    .user { font-weight: bold; color: #2c3e50; }
+    .bot { color: #16a085; }
+    #inputArea { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Guesthouse Chatbot</h2>
+  <div id="chatbox"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Escreva a sua pergunta..." style="width: 220px;">
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Mostrar mensagem do utilizador
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML += `<div class="message user">Você: ${message}</div>`;
+
+      // Enviar para o servidor Flask
+      const response = await fetch("https://ghpombinha.onrender.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+
+      // Mostrar resposta do bot
+      chatbox.innerHTML += `<div class="message bot">Bot: ${data.response}</div>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
