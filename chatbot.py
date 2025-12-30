@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-CORS(app)
+
 
 app = Flask(__name__)
-
+CORS(app)
 # Respostas simples pré-definidas
 faq = {
     "preço": "Os quartos começam a partir de 60€ por noite.",
