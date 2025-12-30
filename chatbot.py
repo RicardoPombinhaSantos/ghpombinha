@@ -12,7 +12,7 @@ faq = {
     "check-out": "O check-out é até às 11h."
 }
 
-GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbynqKmQ-9NKx_6lN1t-fkWaHyAA_UP-8XEIufUZgwxGO9WEu7uk-Mydrg4Fyn2A7ECevQ/exec"
+GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
 @app.route("/chat", methods=["POST"])
 def chat():
