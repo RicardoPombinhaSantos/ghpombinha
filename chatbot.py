@@ -20,7 +20,7 @@ faq = {
     },
     "localização": {
         "keywords": [
-            "localização", "location", "ubicación", "emplacement", "lage",
+            "location", "localização", "ubicación", "emplacement", "lage",
             "onde fica", "where are you", "onde estão", "onde é", "where is"
         ],
         "answer": "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé."
