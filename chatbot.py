@@ -147,7 +147,7 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Le camere partono da 60€ a notte.",
         "de": "Die Zimmer beginnen bei 60€ pro Nacht."
     },
-    "Estamos em Leiria, a 10 minutos do centro.": {
+    "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé.": {
         "en": "We are in Nazaré, 5 minutes from the center.",
         "es": "Estamos en Nazaré, 5 minutos del centro.",
         "fr": "Nous sommes à Nazaré, 5 minutes du centre.",
