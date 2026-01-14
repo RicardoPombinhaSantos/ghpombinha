@@ -139,7 +139,6 @@ GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZ
 # -----------------------------------------
 # Traduções manuais de respostas (fallback)
 # -----------------------------------------
-# Se a API de tradução falhar, usamos estas traduções prontas.
 MANUAL_ANSWER_TRANSLATIONS = {
     "Os quartos começam a partir de 60€ por noite.": {
         "en": "Rooms start at €60 per night.",
@@ -252,10 +251,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
 # Tradução MyMemory (CORRIGIDA e robusta)
 # -----------------------------------------
 def translate_text(text, source_lang, target_lang):
-    """
-    Traduz texto usando MyMemory com parâmetro &de e fallback manual.
-    Se a API devolver o mesmo texto (ou falhar), tenta usar traduções manuais.
-    """
     if not text:
         return text
     if source_lang == target_lang:
@@ -271,29 +266,17 @@ def translate_text(text, source_lang, target_lang):
         )
         resp = requests.get(url, timeout=5)
         data = resp.json() if resp.status_code == 200 else {}
-        translated = (
-            data.get("responseData", {}).get("translatedText")
-            or ""
-        )
+        translated = data.get("responseData", {}).get("translatedText") or ""
 
-        # Se a API devolveu vazio ou igual ao original (muitas vezes acontece),
-        # usamos fallback manual se existir.
+        # Se a API devolveu vazio ou igual ao original, usar fallback manual
         if not translated or translated.strip() == text.strip():
             manual = MANUAL_ANSWER_TRANSLATIONS.get(text.strip())
             if manual:
-                # se houver tradução manual para o idioma pedido, devolve-a
                 code = target_lang.lower()[:2]
                 return manual.get(code, text)
-            # tentar uma tradução simples de fallback: se target en/es/fr/it/de e houver manual para a versão em pt
-            for pt_answer, translations in MANUAL_ANSWER_TRANSLATIONS.items():
-                if text.strip() == pt_answer:
-                    code = target_lang.lower()[:2]
-                    return translations.get(code, text)
-            # se nada, devolve original (fallback seguro)
             return text
         return translated
     except Exception:
-        # Em caso de erro de rede, usar fallback manual se existir
         manual = MANUAL_ANSWER_TRANSLATIONS.get(text.strip())
         if manual:
             code = target_lang.lower()[:2]
@@ -304,12 +287,6 @@ def translate_text(text, source_lang, target_lang):
 # Deteção de idioma (robusta)
 # -----------------------------------------
 def detect_language(text):
-    """
-    Usa MyMemory para detetar idioma. Se falhar, tenta heurística simples:
-    - se texto contém palavras claramente inglesas -> 'en'
-    - se contém acentos portugueses/portuguese words -> 'pt'
-    - fallback -> 'pt'
-    """
     if not text or not text.strip():
         return "pt"
 
@@ -338,14 +315,36 @@ def detect_language(text):
     return "pt"
 
 # -----------------------------------------
-# Matching melhorado (exato + fuzzy)
+# Matching melhorado (exato + fuzzy) e inferência de idioma da keyword
 # -----------------------------------------
+# Pequenas listas para inferir idioma a partir da keyword encontrada
+LANG_HINTS = {
+    "en": {"price", "how", "what", "where", "room", "rooms", "breakfast", "parking", "check"},
+    "es": {"precio", "donde", "comer", "desayuno", "playa"},
+    "fr": {"prix", "où", "où", "plage", "arrivée", "départ"},
+    "it": {"prezzo", "colazione", "dove", "cosa"},
+    "de": {"preis", "wo", "frühstück", "parkplatz", "ankunft"}
+}
+
+def infer_lang_from_keyword(kw):
+    k = kw.lower()
+    for code, hints in LANG_HINTS.items():
+        for h in hints:
+            if h in k:
+                return code
+    # fallback: if contains accent typical of pt
+    if any(ch in k for ch in "ãáâàçõéêíóú"):
+        return "pt"
+    return None
+
 def find_best_faq_match(user_message_lower):
     # 1. Matching direto por substring em qualquer keyword
     for topic, data in faq.items():
         for kw in data["keywords"]:
             if kw in user_message_lower:
-                return data["answer"]
+                # inferir idioma a partir da keyword encontrada
+                inferred = infer_lang_from_keyword(kw) or "pt"
+                return data["answer"], inferred
 
     # 2. Fuzzy matching simples com difflib (sem libs externas)
     words = user_message_lower.split()
@@ -360,9 +359,10 @@ def find_best_faq_match(user_message_lower):
     for w in words:
         close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.75)
         if close:
-            return mapping[close[0]]
+            inferred = infer_lang_from_keyword(close[0]) or "pt"
+            return mapping[close[0]], inferred
 
-    return None
+    return None, None
 
 # -----------------------------------------
 # Endpoint principal
@@ -370,25 +370,34 @@ def find_best_faq_match(user_message_lower):
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "") or ""
-    user_lang = detect_language(user_message)
     user_message_lower = user_message.lower()
 
-    answer_pt = find_best_faq_match(user_message_lower)
+    # Primeiro tentamos encontrar match por keywords (e inferir idioma da keyword)
+    answer_pt, inferred_lang = find_best_faq_match(user_message_lower)
 
     if answer_pt:
-        translated_answer = translate_text(answer_pt, "pt", user_lang)
+        # se inferimos idioma da keyword, usamos esse idioma; caso contrário, detectamos
+        target_lang = inferred_lang if inferred_lang else detect_language(user_message)
+        translated_answer = translate_text(answer_pt, "pt", target_lang)
         return jsonify({"response": translated_answer})
 
-    # Pergunta nova → enviar para Google Sheets
+    # Se não houve match por keywords, detetar idioma e procurar fallback
+    user_lang = detect_language(user_message)
+    # tentar matching normal (sem inferência) — útil para frases maiores
+    answer_pt2, _ = find_best_faq_match(user_message_lower)
+    if answer_pt2:
+        translated_answer = translate_text(answer_pt2, "pt", user_lang)
+        return jsonify({"response": translated_answer})
+
+    # Pergunta nova → enviar para Google Sheets (não bloquear)
     try:
         requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message}, timeout=3)
     except Exception:
         pass
 
     fallback = "Pode repetir a sua questão? 😊"
-    translated_fallback = translate_text(fallback, "pt", user_lang)
+    translated_fallback = translate_text(fallback, "pt", user_lang if 'user_lang' in locals() else "pt")
     return jsonify({"response": translated_fallback})
-
 
 if __name__ == "__main__":
     app.run(debug=True)
