@@ -20,7 +20,7 @@ faq = {
     },
     "localização": {
         "keywords": [
-            "location", "localização", "ubicación", "emplacement", "lage",
+            "localização", "location", "ubicación", "emplacement", "lage",
             "onde fica", "where are you", "onde estão", "onde é", "where is"
         ],
         "answer": "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé."
@@ -147,7 +147,7 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Le camere partono da 60€ a notte.",
         "de": "Die Zimmer beginnen bei 60€ pro Nacht."
     },
-    "localização": {
+    "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé.": {
         "en": "We are in Nazaré, 5 minutes from the center.",
         "es": "Estamos en Nazaré, 5 minutos del centro.",
         "fr": "Nous sommes à Nazaré, 5 minutes du centre.",
@@ -304,7 +304,7 @@ def detect_language(text):
 
     # Heurística simples
     lower = t.lower()
-    english_hints = ["price", "what", "where", "how", "room", "check", "breakfast", "parking"]
+    english_hints = ["price", "location", "what", "where", "how", "room", "check", "breakfast", "parking"]
     portuguese_hints = ["preço", "onde", "quartos", "pequeno", "almoço", "estacionamento", "check-in"]
     for w in english_hints:
         if w in lower:
@@ -319,7 +319,7 @@ def detect_language(text):
 # -----------------------------------------
 # Pequenas listas para inferir idioma a partir da keyword encontrada
 LANG_HINTS = {
-    "en": {"price", "how", "what", "where", "room", "rooms", "breakfast", "parking", "check"},
+    "en": {"price","location" "how", "what", "where", "room", "rooms", "breakfast", "parking", "check"},
     "es": {"precio", "donde", "comer", "desayuno", "playa"},
     "fr": {"prix", "où", "où", "plage", "arrivée", "départ"},
     "it": {"prezzo", "colazione", "dove", "cosa"},
