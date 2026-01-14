@@ -262,7 +262,7 @@ def translate_text(text, source_lang, target_lang):
             "https://api.mymemory.translated.net/get"
             f"?q={q}"
             f"&langpair={source_lang}|{target_lang}"
-            "&de=guesthouse@example.com"
+            "&de=guesthousepombinha@gmail.com"
         )
         resp = requests.get(url, timeout=5)
         data = resp.json() if resp.status_code == 200 else {}
