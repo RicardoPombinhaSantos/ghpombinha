@@ -21,7 +21,6 @@ GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZ
 def translate_text(text, source_lang, target_lang):
     """Traduz texto usando MyMemory API com fallback seguro."""
     
-    # Evitar erro "PLEASE SELECT TWO DISTINCT LANGUAGES"
     if source_lang == target_lang:
         return text
 
@@ -30,30 +29,22 @@ def translate_text(text, source_lang, target_lang):
         response = requests.get(url).json()
         return response["responseData"]["translatedText"]
     except:
-        return text  # fallback se a API falhar
+        return text
 
 
 def detect_language(text):
-    """Deteta idioma usando MyMemory com fallback inteligente."""
-    t = text.strip().lower()
-
-    # Palavras curtas → MyMemory falha → assumir inglês
-    if len(t) < 4:
-        return "en"
-
-    # Palavras típicas de inglês → assumir inglês
-    EN_HINTS = ["price", "hello", "hi", "how", "much", "location", "check"]
-    for w in EN_HINTS:
-        if w in t:
-            return "en"
-
+    """Deteta idioma usando MyMemory com fallback seguro e neutro."""
     try:
         url = f"https://api.mymemory.translated.net/get?q={text}&langpair=auto|en"
         response = requests.get(url).json()
         lang = response["responseData"].get("matchedLanguage")
-        return lang.lower() if lang else "en"
+
+        if lang:
+            return lang.lower()
+
+        return "pt"
     except:
-        return "en"
+        return "pt"
 
 
 # -----------------------------
@@ -63,19 +54,15 @@ def detect_language(text):
 def chat():
     user_message = request.json.get("message", "")
 
-    # Detetar idioma do utilizador
     user_lang = detect_language(user_message)
 
-    # Converter para minúsculas para comparar com FAQ
     user_message_lower = user_message.lower()
 
-    # Verificar FAQ
     for key, answer in faq.items():
         if key in user_message_lower:
             translated_answer = translate_text(answer, "pt", user_lang)
             return jsonify({"response": translated_answer})
 
-    # Pergunta nova → enviar para Google Sheets
     requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message})
 
     fallback = "Pode repetir a sua questão? 😊"
