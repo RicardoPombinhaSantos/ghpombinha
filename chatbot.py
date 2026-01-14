@@ -138,10 +138,9 @@ faq = {
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
 # -----------------------------------------
-# ✅ TRADUÇÕES COMPLETAS - TODAS AS RESPOSTAS
+# TRADUÇÕES COMPLETAS
 # -----------------------------------------
 MANUAL_ANSWER_TRANSLATIONS = {
-    # PREÇO
     "Os quartos começam a partir de 60€ por noite.": {
         "en": "Rooms start at €60 per night.",
         "es": "Las habitaciones comienzan desde 60€ por noche.",
@@ -149,8 +148,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Le camere partono da 60€ a notte.",
         "de": "Die Zimmer beginnen bei 60€ pro Nacht."
     },
-    
-    # LOCALIZAÇÃO - ✅ CORRIGIDO!
     "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé.": {
         "en": "We are in Nazaré, 5 minutes from the center by car and 30 minutes on foot.",
         "es": "Estamos en Nazaré, a 5 minutos del centro en coche y 30 minutos a pie.",
@@ -158,8 +155,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Siamo a Nazaré, a 5 minuti dal centro in auto e 30 minuti a piedi.",
         "de": "Wir sind in Nazaré, 5 Minuten vom Zentrum mit dem Auto und 30 Minuten zu Fuß."
     },
-    
-    # CHECK-IN
     "O check-in é das 15h às 21h.": {
         "en": "Check-in is from 3:00 PM to 9:00 PM.",
         "es": "El check-in es de 15:00 a 21:00.",
@@ -167,8 +162,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Il check-in è dalle 15:00 alle 21:00.",
         "de": "Der Check-in ist von 15:00 bis 21:00 Uhr."
     },
-    
-    # CHECK-OUT
     "O check-out é até às 11:30h.": {
         "en": "Check-out is until 11:30 AM.",
         "es": "El check-out es hasta las 11:30.",
@@ -176,8 +169,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Il check-out è entro le 11:30.",
         "de": "Der Check-out ist bis 11:30 Uhr."
     },
-    
-    # NAZARÉ
     "A Nazaré é famosa pelas ondas gigantes na Praia do Norte, estamos a 5 minutos de carro das ondas.": {
         "en": "Nazaré is famous for the giant waves at Praia do Norte, we are 5 minutes by car from the waves.",
         "es": "Nazaré es famosa por las olas gigantes en Praia do Norte, estamos a 5 minutos en coche de las olas.",
@@ -185,8 +176,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Nazaré è famosa per le onde giganti a Praia do Norte, siamo a 5 minuti di auto dalle onde.",
         "de": "Nazaré ist berühmt für die riesigen Wellen am Praia do Norte, wir sind 5 Minuten mit dem Auto von den Wellen entfernt."
     },
-    
-    # O QUE VER
     "Perto da Nazaré pode visitar o castelo, o Santuário de Fátima, o Mosteiro da Batalha, São Pedro de Moel e Alcobaça.": {
         "en": "Near Nazaré you can visit the castle, the Sanctuary of Fátima, the Batalha Monastery, São Pedro de Moel and Alcobaça.",
         "es": "Cerca de Nazaré puede visitar el castillo, el Santuario de Fátima, el Monasterio de Batalha, São Pedro de Moel y Alcobaça.",
@@ -194,8 +183,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Vicino a Nazaré potete visitare il castello, il Santuario di Fátima, il Monastero di Batalha, São Pedro de Moel e Alcobaça.",
         "de": "In der Nähe von Nazaré können Sie die Burg, das Heiligtum von Fátima, das Kloster Batalha, São Pedro de Moel und Alcobaça besuchen."
     },
-    
-    # RESTAURANTES
     "Recomendamos o restaurante 'O Casarão', 'Taberna do Terreiro' e 'Mata Bicho' em Leiria.": {
         "en": "We recommend the restaurants 'O Casarão', 'Taberna do Terreiro' and 'Mata Bicho' in Leiria.",
         "es": "Recomendamos los restaurantes 'O Casarão', 'Taberna do Terreiro' y 'Mata Bicho' en Leiria.",
@@ -203,8 +190,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Consigliamo i ristoranti 'O Casarão', 'Taberna do Terreiro' e 'Mata Bicho' a Leiria.",
         "de": "Wir empfehlen die Restaurants 'O Casarão', 'Taberna do Terreiro' und 'Mata Bicho' in Leiria."
     },
-    
-    # ESTACIONAMENTO
     "Temos estacionamento gratuito junto à propriedade.": {
         "en": "We have free parking next to the property.",
         "es": "Tenemos aparcamiento gratuito junto a la propiedad.",
@@ -212,8 +197,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Abbiamo parcheggio gratuito accanto alla struttura.",
         "de": "Wir haben einen kostenlosen Parkplatz neben der Unterkunft."
     },
-    
-    # WIFI
     "Disponibilizamos Wi-Fi gratuito em toda a propriedade.": {
         "en": "We provide free Wi-Fi throughout the property.",
         "es": "Disponemos de Wi-Fi gratuito en toda la propiedad.",
@@ -221,8 +204,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Forniamo Wi-Fi gratuito in tutta la struttura.",
         "de": "Wir bieten kostenloses WLAN auf dem gesamten Gelände."
     },
-    
-    # ANIMAIS
     "Aceitamos animais de estimação mediante pedido prévio.": {
         "en": "We accept pets upon prior request.",
         "es": "Aceptamos mascotas bajo petición previa.",
@@ -230,8 +211,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Accettiamo animali su richiesta preventiva.",
         "de": "Haustiere sind auf Anfrage erlaubt."
     },
-    
-    # PEQUENO-ALMOÇO
     "O pequeno-almoço está incluído em algumas tarifas. Confirme na sua reserva ou contacte-nos.": {
         "en": "Breakfast is included in some rates. Please check your booking or contact us.",
         "es": "El desayuno está incluido en algunas tarifas. Confirme en su reserva o contáctenos.",
@@ -239,8 +218,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "La colazione è inclusa in alcune tariffe. Controlla la tua prenotazione o contattaci.",
         "de": "Frühstück ist in einigen Tarifen enthalten. Prüfen Sie Ihre Buchung oder kontaktieren Sie uns."
     },
-    
-    # TRANSPORTES
     "Leiria tem ligações de autocarro e comboio. A partir da estação, pode chegar de táxi ou transporte próprio.": {
         "en": "Leiria has bus and train connections. From the station you can get here by taxi or private transport.",
         "es": "Leiria tiene conexiones de autobús y tren. Desde la estación puede llegar en taxi o transporte propio.",
@@ -248,8 +225,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Leiria ha collegamenti in autobus e treno. Dalla stazione si può arrivare in taxi o con mezzo proprio.",
         "de": "Leiria hat Bus- und Zugverbindungen. Vom Bahnhof erreichen Sie uns mit Taxi oder eigenem Fahrzeug."
     },
-    
-    # PRAIAS
     "As praias mais próximas são São Pedro de Moel, Vieira e Nazaré.": {
         "en": "The nearest beaches are São Pedro de Moel, Vieira and Nazaré.",
         "es": "Las playas más cercanas son São Pedro de Moel, Vieira y Nazaré.",
@@ -257,8 +232,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Le spiagge più vicine sono São Pedro de Moel, Vieira e Nazaré.",
         "de": "Die nächstgelegenen Strände sind São Pedro de Moel, Vieira und Nazaré."
     },
-    
-    # PAGAMENTO
     "Aceitamos pagamento em cartão de crédito, débito e numerário no local.": {
         "en": "We accept payment by credit card, debit card and cash on site.",
         "es": "Aceptamos pago con tarjeta de crédito, débito y efectivo en el lugar.",
@@ -266,8 +239,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Accettiamo pagamenti con carta di credito, carta di debito e contanti in loco.",
         "de": "Wir akzeptieren Zahlungen per Kreditkarte, Debitkarte und bar vor Ort."
     },
-    
-    # POLÍTICA DE CANCELAMENTO
     "A política de cancelamento varia consoante a tarifa. Verifique as condições da sua reserva.": {
         "en": "The cancellation policy varies by rate. Please check your booking conditions.",
         "es": "La política de cancelación varía según la tarifa. Verifique las condiciones de su reserva.",
@@ -275,8 +246,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "La politica di cancellazione varia in base alla tariffa. Controlla le condizioni della tua prenotazione.",
         "de": "Die Stornierungsbedingungen variieren je nach Tarif. Prüfen Sie die Bedingungen Ihrer Buchung."
     },
-    
-    # QUARTOS
     "Temos vários tipos de quarto, incluindo duplos, twin e familiares. Contacte-nos para disponibilidade.": {
         "en": "We have several room types, including doubles, twins and family rooms. Contact us for availability.",
         "es": "Tenemos varios tipos de habitación, incluidos dobles, twin y familiares. Contáctenos para disponibilidad.",
@@ -284,8 +253,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Abbiamo diversi tipi di camere, tra cui doppie, twin e familiari. Contattaci per disponibilità.",
         "de": "Wir haben verschiedene Zimmertypen, darunter Doppel-, Twin- und Familienzimmer. Kontaktieren Sie uns für Verfügbarkeit."
     },
-    
-    # CAPACIDADE
     "Alguns quartos acomodam até 2 pessoas, outros até 4. Indique-nos o número de hóspedes.": {
         "en": "Some rooms accommodate up to 2 people, others up to 4. Please tell us the number of guests.",
         "es": "Algunas habitaciones acomodan hasta 2 personas, otras hasta 4. Indíquenos el número de huéspedes.",
@@ -293,8 +260,6 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Alcune camere ospitano fino a 2 persone, altre fino a 4. Indicateci il numero di ospiti.",
         "de": "Einige Zimmer bieten Platz für bis zu 2 Personen, andere bis zu 4. Teilen Sie uns die Anzahl der Gäste mit."
     },
-    
-    # FALLBACK
     "Pode repetir a sua questão? 😊": {
         "en": "Could you repeat your question? 😊",
         "es": "¿Puede repetir su pregunta? 😊",
@@ -305,14 +270,19 @@ MANUAL_ANSWER_TRANSLATIONS = {
 }
 
 # -----------------------------------------
+# Keywords ambíguas (que existem em vários idiomas)
+# -----------------------------------------
+AMBIGUOUS_KEYWORDS = {"check-in", "check in", "check-out", "check out", "wifi", "wi-fi", "internet"}
+
+# -----------------------------------------
 # Inferir idioma a partir da keyword
 # -----------------------------------------
 LANG_HINTS = {
-    "en": {"price", "location", "how", "what", "where", "room", "rooms", "breakfast", "parking", "check"},
-    "es": {"precio", "donde", "comer", "desayuno", "playa", "ubicación"},
+    "en": {"price", "location", "how", "what", "where", "room", "rooms", "breakfast", "parking", "arrival", "departure"},
+    "es": {"precio", "donde", "comer", "desayuno", "playa", "ubicación", "llegada", "salida"},
     "fr": {"prix", "où", "plage", "arrivée", "départ", "emplacement"},
     "it": {"prezzo", "colazione", "dove", "cosa"},
-    "de": {"preis", "wo", "frühstück", "parkplatz", "ankunft", "lage"}
+    "de": {"preis", "wo", "frühstück", "parkplatz", "ankunft", "abreise", "lage"}
 }
 
 def infer_lang_from_keyword(kw):
@@ -326,60 +296,98 @@ def infer_lang_from_keyword(kw):
     return None
 
 # -----------------------------------------
-# Tradução com fallback manual primeiro
+# Detecção de idioma pela frase completa
+# -----------------------------------------
+def detect_language_from_sentence(text):
+    """Detecta o idioma analisando a frase completa"""
+    if not text or not text.strip():
+        return "pt"
+    
+    lower = text.lower()
+    
+    # Palavras fortes por idioma
+    pt_indicators = ["é", "são", "que", "qual", "onde", "quando", "quanto", "a que horas", "às", "das"]
+    en_indicators = ["is", "are", "what", "when", "where", "how", "at what time", "the"]
+    es_indicators = ["es", "son", "qué", "cuál", "dónde", "cuándo", "a qué hora", "las"]
+    fr_indicators = ["est", "sont", "quel", "quelle", "où", "quand", "à quelle heure", "les"]
+    de_indicators = ["ist", "sind", "was", "wo", "wann", "um wie viel uhr", "die"]
+    
+    # Contar indicadores
+    scores = {
+        "pt": sum(1 for w in pt_indicators if w in lower),
+        "en": sum(1 for w in en_indicators if w in lower),
+        "es": sum(1 for w in es_indicators if w in lower),
+        "fr": sum(1 for w in fr_indicators if w in lower),
+        "de": sum(1 for w in de_indicators if w in lower)
+    }
+    
+    # Retornar o idioma com mais pontos
+    max_lang = max(scores, key=scores.get)
+    return max_lang if scores[max_lang] > 0 else "pt"
+
+# -----------------------------------------
+# Tradução com fallback manual
 # -----------------------------------------
 def translate_text(text, source_lang, target_lang):
     if not text or source_lang == target_lang:
         return text
     
-    # ✅ TENTAR PRIMEIRO O DICIONÁRIO MANUAL
+    # Tentar primeiro o dicionário manual
     manual = MANUAL_ANSWER_TRANSLATIONS.get(text.strip())
     if manual:
         code = target_lang.lower()[:2]
         return manual.get(code, text)
-    
-    # Fallback para API MyMemory
-    try:
-        q = urllib.parse.quote_plus(text)
-        url = f"https://api.mymemory.translated.net/get?q={q}&langpair={source_lang}|{target_lang}"
-        resp = requests.get(url, timeout=5)
-        data = resp.json() if resp.status_code == 200 else {}
-        translated = data.get("responseData", {}).get("translatedText") or ""
-        if translated and translated.strip() != text.strip():
-            return translated
-    except:
-        pass
     
     return text
 
 # -----------------------------------------
 # Matching de FAQ
 # -----------------------------------------
-def find_best_faq_match(user_message_lower):
+def find_best_faq_match(user_message, user_message_lower):
+    """Retorna (resposta_pt, idioma_detectado)"""
+    matched_keyword = None
+    matched_answer = None
+    
     # 1. Match direto por substring
     for topic, data in faq.items():
         for kw in data["keywords"]:
             if kw in user_message_lower:
-                inferred = infer_lang_from_keyword(kw) or "pt"
-                return data["answer"], inferred
+                matched_keyword = kw
+                matched_answer = data["answer"]
+                break
+        if matched_answer:
+            break
     
-    # 2. Fuzzy matching
-    words = user_message_lower.split()
-    all_keywords = []
-    mapping = {}
+    if not matched_answer:
+        # 2. Fuzzy matching
+        words = user_message_lower.split()
+        all_keywords = []
+        mapping = {}
+        
+        for topic, data in faq.items():
+            for kw in data["keywords"]:
+                all_keywords.append(kw)
+                mapping[kw] = data["answer"]
+        
+        for w in words:
+            close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.78)
+            if close:
+                matched_keyword = close[0]
+                matched_answer = mapping[close[0]]
+                break
     
-    for topic, data in faq.items():
-        for kw in data["keywords"]:
-            all_keywords.append(kw)
-            mapping[kw] = data["answer"]
+    if not matched_answer:
+        return None, None
     
-    for w in words:
-        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.78)
-        if close:
-            inferred = infer_lang_from_keyword(close[0]) or "pt"
-            return mapping[close[0]], inferred
+    # Decidir o idioma
+    # Se a keyword é ambígua, analisar a frase completa
+    if matched_keyword in AMBIGUOUS_KEYWORDS:
+        detected_lang = detect_language_from_sentence(user_message)
+    else:
+        # Keyword não-ambígua, inferir da keyword
+        detected_lang = infer_lang_from_keyword(matched_keyword) or "pt"
     
-    return None, None
+    return matched_answer, detected_lang
 
 # -----------------------------------------
 # Endpoint principal
@@ -389,12 +397,12 @@ def chat():
     user_message = request.json.get("message", "").strip()
     user_message_lower = user_message.lower()
     
-    # Encontrar match e inferir idioma
-    answer_pt, inferred_lang = find_best_faq_match(user_message_lower)
+    # Encontrar match e detectar idioma
+    answer_pt, detected_lang = find_best_faq_match(user_message, user_message_lower)
     
     if answer_pt:
-        # Traduzir resposta para o idioma inferido
-        translated_answer = translate_text(answer_pt, "pt", inferred_lang)
+        # Traduzir resposta para o idioma detectado
+        translated_answer = translate_text(answer_pt, "pt", detected_lang)
         return jsonify({"response": translated_answer})
     
     # Sem match → enviar para Google Sheets
@@ -404,8 +412,8 @@ def chat():
         pass
     
     # Fallback
+    fallback_lang = detect_language_from_sentence(user_message)
     fallback = "Pode repetir a sua questão? 😊"
-    fallback_lang = inferred_lang if inferred_lang else "pt"
     translated_fallback = translate_text(fallback, "pt", fallback_lang)
     return jsonify({"response": translated_fallback})
 
