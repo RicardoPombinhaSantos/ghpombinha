@@ -34,14 +34,26 @@ def translate_text(text, source_lang, target_lang):
 
 
 def detect_language(text):
-    """Deteta idioma usando MyMemory com fallback seguro."""
+    """Deteta idioma usando MyMemory com fallback inteligente."""
+    t = text.strip().lower()
+
+    # Palavras curtas → MyMemory falha → assumir inglês
+    if len(t) < 4:
+        return "en"
+
+    # Palavras típicas de inglês → assumir inglês
+    EN_HINTS = ["price", "hello", "hi", "how", "much", "location", "check"]
+    for w in EN_HINTS:
+        if w in t:
+            return "en"
+
     try:
         url = f"https://api.mymemory.translated.net/get?q={text}&langpair=auto|en"
         response = requests.get(url).json()
         lang = response["responseData"].get("matchedLanguage")
-        return lang.lower() if lang else "pt"
+        return lang.lower() if lang else "en"
     except:
-        return "pt"
+        return "en"
 
 
 # -----------------------------
