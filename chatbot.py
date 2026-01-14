@@ -1,15 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
-import deepl
-import os
 
 app = Flask(__name__)
 CORS(app)
-
-# API KEY do DeepL (ideal: variável de ambiente)
-DEEPL_KEY = os.getenv("DEEPL_API_KEY", "AQUI_A_TUA_API_KEY")
-translator = deepl.Translator(DEEPL_KEY)
 
 faq = {
     "preço": "Os quartos começam a partir de 60€ por noite.",
@@ -20,16 +14,17 @@ faq = {
 
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
-def translate_text(text, target_lang):
-    """Traduz texto usando DeepL."""
-    result = translator.translate_text(text, target_lang=target_lang)
-    return result.text
+def translate_text(text, source_lang, target_lang):
+    """Traduz texto usando MyMemory API."""
+    url = f"https://api.mymemory.translated.net/get?q={text}&langpair={source_lang}|{target_lang}"
+    response = requests.get(url).json()
+    return response["responseData"]["translatedText"]
 
 def detect_language(text):
-    """Deteta idioma usando DeepL."""
-    # DeepL devolve o idioma original ao traduzir
-    result = translator.translate_text(text, target_lang="EN-US")
-    return result.detected_source_lang.lower()
+    """Deteta idioma usando MyMemory (truque simples)."""
+    url = f"https://api.mymemory.translated.net/get?q={text}&langpair=auto|en"
+    response = requests.get(url).json()
+    return response["responseData"]["matchedLanguage"]
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -44,17 +39,16 @@ def chat():
     # Verificar FAQ
     for key, answer in faq.items():
         if key in user_message_lower:
-            translated_answer = translate_text(answer, user_lang)
+            translated_answer = translate_text(answer, "pt", user_lang)
             return jsonify({"response": translated_answer})
 
     # Pergunta nova → enviar para Google Sheets
     requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message})
 
     fallback = "Pode repetir a sua questão? 😊"
-    translated_fallback = translate_text(fallback, user_lang)
+    translated_fallback = translate_text(fallback, "pt", user_lang)
 
     return jsonify({"response": translated_fallback})
 
 if __name__ == "__main__":
     app.run(debug=True)
-
