@@ -136,13 +136,18 @@ faq = {
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
 # -----------------------------------------
-# Tradução MyMemory
+# Tradução MyMemory (CORRIGIDA)
 # -----------------------------------------
 def translate_text(text, source_lang, target_lang):
     if source_lang == target_lang:
         return text
     try:
-        url = f"https://api.mymemory.translated.net/get?q={text}&langpair={source_lang}|{target_lang}"
+        url = (
+            "https://api.mymemory.translated.net/get"
+            f"?q={text}"
+            f"&langpair={source_lang}|{target_lang}"
+            "&de=guesthouse@example.com"
+        )
         response = requests.get(url).json()
         return response["responseData"]["translatedText"]
     except:
@@ -164,13 +169,11 @@ def detect_language(text):
 # Matching melhorado (exato + fuzzy)
 # -----------------------------------------
 def find_best_faq_match(user_message_lower):
-    # 1. Matching direto por substring em qualquer keyword
     for topic, data in faq.items():
         for kw in data["keywords"]:
             if kw in user_message_lower:
                 return data["answer"]
 
-    # 2. Fuzzy matching simples com difflib (sem libs externas)
     words = user_message_lower.split()
     all_keywords = []
     mapping = {}
@@ -202,7 +205,6 @@ def chat():
         translated_answer = translate_text(answer_pt, "pt", user_lang)
         return jsonify({"response": translated_answer})
 
-    # Pergunta nova → enviar para Google Sheets
     requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message})
 
     fallback = "Pode repetir a sua questão? 😊"
