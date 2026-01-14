@@ -23,28 +23,28 @@ faq = {
             "localização", "location", "ubicación", "emplacement", "lage",
             "onde fica", "where are you", "onde estão", "onde é", "where is"
         ],
-        "answer": "Estamos em Leiria, a 10 minutos do centro."
+        "answer": "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé."
     },
     "check-in": {
         "keywords": [
             "check-in", "check in", "hora de entrada", "arrival time",
             "arrivée", "llegada", "ankunft", "time to check in"
         ],
-        "answer": "O check-in é das 14h às 20h."
+        "answer": "O check-in é das 15h às 21h."
     },
     "check-out": {
         "keywords": [
             "check-out", "check out", "hora de saída", "departure time",
             "départ", "salida", "abreise", "time to check out"
         ],
-        "answer": "O check-out é até às 11h."
+        "answer": "O check-out é até às 11:30h."
     },
     "nazaré": {
         "keywords": [
             "nazaré", "nazare", "big waves", "ondas grandes", "praia da nazaré",
             "nazaré beach", "plage nazaré", "playa nazaré"
         ],
-        "answer": "A Nazaré fica a cerca de 30 minutos e é famosa pelas ondas gigantes na Praia do Norte."
+        "answer": "A Nazaré é famosa pelas ondas gigantes na Praia do Norte, estamos a 5 minutos de carro das ondas."
     },
     "o que ver": {
         "keywords": [
@@ -52,7 +52,7 @@ faq = {
             "sightseeing", "tourism", "qué ver", "cosa vedere", "was sehen",
             "visitar", "visit", "places to visit"
         ],
-        "answer": "Perto de Leiria pode visitar o castelo, o Santuário de Fátima, o Mosteiro da Batalha e São Pedro de Moel."
+        "answer": "Perto da Nazaré pode visitar o castelo, o Santuário de Fátima, o Mosteiro da Batalha, São Pedro de Moel e Alcobaça."
     },
     "restaurantes": {
         "keywords": [
@@ -148,11 +148,11 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "de": "Die Zimmer beginnen bei 60€ pro Nacht."
     },
     "Estamos em Leiria, a 10 minutos do centro.": {
-        "en": "We are in Leiria, 10 minutes from the center.",
-        "es": "Estamos en Leiria, a 10 minutos del centro.",
-        "fr": "Nous sommes à Leiria, à 10 minutes du centre.",
-        "it": "Siamo a Leiria, a 10 minuti dal centro.",
-        "de": "Wir sind in Leiria, 10 Minuten vom Zentrum entfernt."
+        "en": "We are in Nazaré, 5 minutes from the center.",
+        "es": "Estamos en Nazaré, 5 minutos del centro.",
+        "fr": "Nous sommes à Nazaré, 5 minutes du centre.",
+        "it": "Siamo a Nazaré, 5 minuti dal centro.",
+        "de": "Wir sind in Nazaré, 5 Minuten vom Zentrum entfernt."
     },
     "O check-in é das 14h às 20h.": {
         "en": "Check-in is from 14:00 to 20:00.",
