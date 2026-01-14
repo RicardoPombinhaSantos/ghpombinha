@@ -147,7 +147,7 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "it": "Le camere partono da 60€ a notte.",
         "de": "Die Zimmer beginnen bei 60€ pro Nacht."
     },
-    "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé.": {
+    "localizacao": {
         "en": "We are in Nazaré, 5 minutes from the center.",
         "es": "Estamos en Nazaré, 5 minutos del centro.",
         "fr": "Nous sommes à Nazaré, 5 minutes du centre.",
@@ -357,7 +357,7 @@ def find_best_faq_match(user_message_lower):
             mapping[kw] = data["answer"]
 
     for w in words:
-        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.75)
+        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.78)
         if close:
             inferred = infer_lang_from_keyword(close[0]) or "pt"
             return mapping[close[0]], inferred
