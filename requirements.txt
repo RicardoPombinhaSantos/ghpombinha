@@ -2,4 +2,5 @@ flask
 gunicorn
 flask-cors
 requests
-googletrans==4.0.0-rc1
+deepl
+
