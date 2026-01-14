@@ -14,18 +14,34 @@ faq = {
 
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
+
+# -----------------------------
+# Funções robustas MyMemory
+# -----------------------------
 def translate_text(text, source_lang, target_lang):
-    """Traduz texto usando MyMemory API."""
-    url = f"https://api.mymemory.translated.net/get?q={text}&langpair={source_lang}|{target_lang}"
-    response = requests.get(url).json()
-    return response["responseData"]["translatedText"]
+    """Traduz texto usando MyMemory API com fallback seguro."""
+    try:
+        url = f"https://api.mymemory.translated.net/get?q={text}&langpair={source_lang}|{target_lang}"
+        response = requests.get(url).json()
+        return response["responseData"]["translatedText"]
+    except:
+        return text  # fallback se a API falhar
+
 
 def detect_language(text):
-    """Deteta idioma usando MyMemory (truque simples)."""
-    url = f"https://api.mymemory.translated.net/get?q={text}&langpair=auto|en"
-    response = requests.get(url).json()
-    return response["responseData"]["matchedLanguage"]
+    """Deteta idioma usando MyMemory com fallback seguro."""
+    try:
+        url = f"https://api.mymemory.translated.net/get?q={text}&langpair=auto|en"
+        response = requests.get(url).json()
+        lang = response["responseData"].get("matchedLanguage")
+        return lang if lang else "pt"
+    except:
+        return "pt"
 
+
+# -----------------------------
+# Endpoint principal
+# -----------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "")
@@ -50,5 +66,7 @@ def chat():
 
     return jsonify({"response": translated_fallback})
 
+
 if __name__ == "__main__":
     app.run(debug=True)
+
