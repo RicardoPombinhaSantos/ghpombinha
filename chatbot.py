@@ -20,6 +20,11 @@ GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZ
 # -----------------------------
 def translate_text(text, source_lang, target_lang):
     """Traduz texto usando MyMemory API com fallback seguro."""
+    
+    # Evitar erro "PLEASE SELECT TWO DISTINCT LANGUAGES"
+    if source_lang == target_lang:
+        return text
+
     try:
         url = f"https://api.mymemory.translated.net/get?q={text}&langpair={source_lang}|{target_lang}"
         response = requests.get(url).json()
@@ -34,7 +39,7 @@ def detect_language(text):
         url = f"https://api.mymemory.translated.net/get?q={text}&langpair=auto|en"
         response = requests.get(url).json()
         lang = response["responseData"].get("matchedLanguage")
-        return lang if lang else "pt"
+        return lang.lower() if lang else "pt"
     except:
         return "pt"
 
@@ -69,4 +74,3 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
