@@ -25,6 +25,13 @@ faq = {
         ],
         "answer": "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé."
     },
+    "location": {
+        "keywords": [
+            "location", "ubicación", "emplacement", "lage",
+            "onde fica", "where are you", "onde estão", "onde é", "where is"
+        ],
+        "answer": "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé."
+    },
     "check-in": {
         "keywords": [
             "check-in", "check in", "hora de entrada", "arrival time",
@@ -148,6 +155,13 @@ MANUAL_ANSWER_TRANSLATIONS = {
         "de": "Die Zimmer beginnen bei 60€ pro Nacht."
     },
     "Estamos na Nazaré, a 5 minutos do centro de carro e a 30 minutos a pé.": {
+        "en": "We are in Nazaré, 5 minutes from the center.",
+        "es": "Estamos en Nazaré, 5 minutos del centro.",
+        "fr": "Nous sommes à Nazaré, 5 minutes du centre.",
+        "it": "Siamo a Nazaré, 5 minuti dal centro.",
+        "de": "Wir sind in Nazaré, 5 Minuten vom Zentrum entfernt."
+    },
+    "We are in Nazaré, 5 minutes from the center.": {
         "en": "We are in Nazaré, 5 minutes from the center.",
         "es": "Estamos en Nazaré, 5 minutos del centro.",
         "fr": "Nous sommes à Nazaré, 5 minutes du centre.",
