@@ -357,7 +357,7 @@ def find_best_faq_match(user_message_lower):
             mapping[kw] = data["answer"]
 
     for w in words:
-        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.75)
+        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.9)
         if close:
             inferred = infer_lang_from_keyword(close[0]) or "pt"
             return mapping[close[0]], inferred
