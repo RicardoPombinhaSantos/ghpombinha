@@ -18,7 +18,7 @@ faq = {
         ],
         "answer": "Os quartos começam a partir de 60€ por noite."
     },
-    "localização": {
+    "localizacao": {
         "keywords": [
             "localização", "location", "ubicación", "emplacement", "lage",
             "onde fica", "where are you", "onde estão", "onde é", "where is"
@@ -39,7 +39,7 @@ faq = {
         ],
         "answer": "O check-out é até às 11:30h."
     },
-    "nazaré": {
+    "nazare": {
         "keywords": [
             "nazaré", "nazare", "big waves", "ondas grandes", "praia da nazaré",
             "nazaré beach", "plage nazaré", "playa nazaré"
@@ -111,7 +111,7 @@ faq = {
         ],
         "answer": "Aceitamos pagamento em cartão de crédito, débito e numerário no local."
     },
-    "política de cancelamento": {
+    "politica de cancelamento": {
         "keywords": [
             "cancelamento", "cancellation", "cancel policy", "política de cancelamento",
             "cancelar reserva", "cancel booking"
@@ -357,7 +357,7 @@ def find_best_faq_match(user_message_lower):
             mapping[kw] = data["answer"]
 
     for w in words:
-        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.9)
+        close = difflib.get_close_matches(w, all_keywords, n=1, cutoff=0.75)
         if close:
             inferred = infer_lang_from_keyword(close[0]) or "pt"
             return mapping[close[0]], inferred
