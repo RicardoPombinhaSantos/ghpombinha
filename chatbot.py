@@ -26,7 +26,7 @@ def ask_groq_ai(question, user_lang=None):
     # Se não houver idioma, pedir ao Groq para detectar automaticamente
     if user_lang is None:
         system_prompt = """
-You are an assistant for a guesthouse in Nazaré, Portugal.
+You are an assistant for a GuestHouse in Nazaré, Portugal.
 
 Detect the user's language with maximum accuracy and ALWAYS answer in that language.
 
@@ -53,7 +53,10 @@ Always answer clearly, politely and concisely.
     else:
         # System prompts por idioma (mantidos caso precises no futuro)
         system_prompts = {
-            "pt": """Você é um assistente de um alojamento na Nazaré, Portugal.
+            "pt": """Você é um assistente de uma GuestHouse na Nazaré, Portugal.
+IMPORTANTE:
+Responda SEMPRE em Português Europeu (PT‑PT). 
+Nunca use expressões, ortografia ou construções do Português do Brasil.
 
 INFORMAÇÕES:
 Localização: Nazaré, 5min centro (carro), 30min (pé)
