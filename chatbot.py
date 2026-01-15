@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests
 import difflib
 import urllib.parse
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -390,7 +391,7 @@ def find_best_faq_match(user_message, user_message_lower):
     return matched_answer, detected_lang
 
 # -----------------------------------------
-# Endpoint principal
+# Endpoints
 # -----------------------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -417,5 +418,10 @@ def chat():
     translated_fallback = translate_text(fallback, "pt", fallback_lang)
     return jsonify({"response": translated_fallback})
 
+@app.route("/health", methods=["GET"])
+def health():
+    return "ok", 200
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
