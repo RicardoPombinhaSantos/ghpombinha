@@ -26,8 +26,12 @@ def ask_groq_ai(question, user_lang=None):
     # Se não houver idioma, pedir ao Groq para detectar automaticamente
     if user_lang is None:
         system_prompt = (
-            "Detect the user's language and answer ONLY in that language. "
-            "Keep the tone friendly and concise. You are an assistant for an accommodation in Nazaré, Portugal."
+            "Detect the user's language with maximum accuracy. "
+            "If the user writes even a single word in English, answer ONLY in English. "
+            "If the user writes in another language, answer ONLY in that language. "
+            "Never switch to Portuguese unless the user writes in Portuguese."
+
+
         )
     else:
         # System prompts por idioma (mantidos caso precises no futuro)
