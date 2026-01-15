@@ -2,11 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import difflib
-import urllib.parse
 import os
 
 app = Flask(__name__)
 CORS(app)
+
+# -----------------------------------------
+# CONFIGURAÇÃO GROQ API (GRATUITA)
+# -----------------------------------------
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")  # Adicionar no Render
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # -----------------------------------------
 # FAQ TEMÁTICO MULTILINGUE (respostas em PT)
@@ -271,12 +276,12 @@ MANUAL_ANSWER_TRANSLATIONS = {
 }
 
 # -----------------------------------------
-# Keywords ambíguas (que existem em vários idiomas)
+# Keywords ambíguas
 # -----------------------------------------
 AMBIGUOUS_KEYWORDS = {"check-in", "check in", "check-out", "check out", "wifi", "wi-fi", "internet"}
 
 # -----------------------------------------
-# Inferir idioma a partir da keyword
+# Inferir idioma
 # -----------------------------------------
 LANG_HINTS = {
     "en": {"price", "location", "how", "what", "where", "room", "rooms", "breakfast", "parking", "arrival", "departure"},
@@ -296,24 +301,17 @@ def infer_lang_from_keyword(kw):
         return "pt"
     return None
 
-# -----------------------------------------
-# Detecção de idioma pela frase completa
-# -----------------------------------------
 def detect_language_from_sentence(text):
-    """Detecta o idioma analisando a frase completa"""
     if not text or not text.strip():
         return "pt"
     
     lower = text.lower()
-    
-    # Palavras fortes por idioma
     pt_indicators = ["é", "são", "que", "qual", "onde", "quando", "quanto", "a que horas", "às", "das"]
     en_indicators = ["is", "are", "what", "when", "where", "how", "at what time", "the"]
     es_indicators = ["es", "son", "qué", "cuál", "dónde", "cuándo", "a qué hora", "las"]
     fr_indicators = ["est", "sont", "quel", "quelle", "où", "quand", "à quelle heure", "les"]
     de_indicators = ["ist", "sind", "was", "wo", "wann", "um wie viel uhr", "die"]
     
-    # Contar indicadores
     scores = {
         "pt": sum(1 for w in pt_indicators if w in lower),
         "en": sum(1 for w in en_indicators if w in lower),
@@ -322,18 +320,13 @@ def detect_language_from_sentence(text):
         "de": sum(1 for w in de_indicators if w in lower)
     }
     
-    # Retornar o idioma com mais pontos
     max_lang = max(scores, key=scores.get)
     return max_lang if scores[max_lang] > 0 else "pt"
 
-# -----------------------------------------
-# Tradução com fallback manual
-# -----------------------------------------
 def translate_text(text, source_lang, target_lang):
     if not text or source_lang == target_lang:
         return text
     
-    # Tentar primeiro o dicionário manual
     manual = MANUAL_ANSWER_TRANSLATIONS.get(text.strip())
     if manual:
         code = target_lang.lower()[:2]
@@ -341,15 +334,10 @@ def translate_text(text, source_lang, target_lang):
     
     return text
 
-# -----------------------------------------
-# Matching de FAQ
-# -----------------------------------------
 def find_best_faq_match(user_message, user_message_lower):
-    """Retorna (resposta_pt, idioma_detectado)"""
     matched_keyword = None
     matched_answer = None
     
-    # 1. Match direto por substring
     for topic, data in faq.items():
         for kw in data["keywords"]:
             if kw in user_message_lower:
@@ -360,7 +348,6 @@ def find_best_faq_match(user_message, user_message_lower):
             break
     
     if not matched_answer:
-        # 2. Fuzzy matching
         words = user_message_lower.split()
         all_keywords = []
         mapping = {}
@@ -380,43 +367,168 @@ def find_best_faq_match(user_message, user_message_lower):
     if not matched_answer:
         return None, None
     
-    # Decidir o idioma
-    # Se a keyword é ambígua, analisar a frase completa
     if matched_keyword in AMBIGUOUS_KEYWORDS:
         detected_lang = detect_language_from_sentence(user_message)
     else:
-        # Keyword não-ambígua, inferir da keyword
         detected_lang = infer_lang_from_keyword(matched_keyword) or "pt"
     
     return matched_answer, detected_lang
+
+# -----------------------------------------
+# INTEGRAÇÃO GROQ AI (GRATUITA)
+# -----------------------------------------
+def ask_groq_ai(question, user_lang="pt"):
+    """Usa Groq AI para responder perguntas fora do FAQ"""
+    if not GROQ_API_KEY:
+        return None
+    
+    # System prompt multilingue sobre o alojamento
+    system_prompts = {
+        "pt": """Você é um assistente de um alojamento na Nazaré, Portugal. 
+Informações sobre o alojamento:
+- Localização: Nazaré, a 5 minutos do centro de carro, 30 minutos a pé
+- Quartos a partir de 60€/noite
+- Check-in: 15h-21h | Check-out: até 11:30h
+- Wi-Fi gratuito e estacionamento gratuito
+- Aceitamos animais (pedido prévio)
+- Perto das ondas gigantes da Praia do Norte (5 min de carro)
+- Atrações próximas: Santuário de Fátima, Mosteiro da Batalha, Alcobaça, São Pedro de Moel
+- Restaurantes recomendados: O Casarão, Taberna do Terreiro, Mata Bicho
+
+Responda de forma amigável, breve e útil. Se não souber algo específico, seja honesto.""",
+        
+        "en": """You are an assistant for an accommodation in Nazaré, Portugal.
+Accommodation information:
+- Location: Nazaré, 5 minutes from center by car, 30 minutes on foot
+- Rooms from €60/night
+- Check-in: 3PM-9PM | Check-out: until 11:30AM
+- Free Wi-Fi and free parking
+- We accept pets (prior request)
+- Near the giant waves of Praia do Norte (5 min by car)
+- Nearby attractions: Fátima Sanctuary, Batalha Monastery, Alcobaça, São Pedro de Moel
+- Recommended restaurants: O Casarão, Taberna do Terreiro, Mata Bicho
+
+Answer in a friendly, brief and helpful way. If you don't know something specific, be honest.""",
+        
+        "es": """Eres un asistente de un alojamiento en Nazaré, Portugal.
+Información del alojamiento:
+- Ubicación: Nazaré, a 5 minutos del centro en coche, 30 minutos a pie
+- Habitaciones desde 60€/noche
+- Check-in: 15h-21h | Check-out: hasta 11:30h
+- Wi-Fi gratis y aparcamiento gratuito
+- Aceptamos mascotas (petición previa)
+- Cerca de las olas gigantes de Praia do Norte (5 min en coche)
+- Atracciones cercanas: Santuario de Fátima, Monasterio de Batalha, Alcobaça, São Pedro de Moel
+- Restaurantes recomendados: O Casarão, Taberna do Terreiro, Mata Bicho
+
+Responde de forma amigable, breve y útil. Si no sabes algo específico, sé honesto.""",
+        
+        "fr": """Vous êtes un assistant d'un hébergement à Nazaré, Portugal.
+Informations sur l'hébergement:
+- Emplacement: Nazaré, à 5 minutes du centre en voiture, 30 minutes à pied
+- Chambres à partir de 60€/nuit
+- Enregistrement: 15h-21h | Départ: jusqu'à 11h30
+- Wi-Fi gratuit et parking gratuit
+- Nous acceptons les animaux (demande préalable)
+- Près des vagues géantes de Praia do Norte (5 min en voiture)
+- Attractions à proximité: Sanctuaire de Fátima, Monastère de Batalha, Alcobaça, São Pedro de Moel
+- Restaurants recommandés: O Casarão, Taberna do Terreiro, Mata Bicho
+
+Répondez de manière amicale, brève et utile. Si vous ne savez pas quelque chose de spécifique, soyez honnête.""",
+        
+        "it": """Sei un assistente di un alloggio a Nazaré, Portogallo.
+Informazioni sull'alloggio:
+- Posizione: Nazaré, a 5 minuti dal centro in auto, 30 minuti a piedi
+- Camere da 60€/notte
+- Check-in: 15-21 | Check-out: fino alle 11:30
+- Wi-Fi gratuito e parcheggio gratuito
+- Accettiamo animali (richiesta preventiva)
+- Vicino alle onde giganti di Praia do Norte (5 min in auto)
+- Attrazioni vicine: Santuario di Fátima, Monastero di Batalha, Alcobaça, São Pedro de Moel
+- Ristoranti consigliati: O Casarão, Taberna do Terreiro, Mata Bicho
+
+Rispondi in modo amichevole, breve e utile. Se non sai qualcosa di specifico, sii onesto.""",
+        
+        "de": """Sie sind ein Assistent für eine Unterkunft in Nazaré, Portugal.
+Informationen zur Unterkunft:
+- Standort: Nazaré, 5 Minuten vom Zentrum mit dem Auto, 30 Minuten zu Fuß
+- Zimmer ab 60€/Nacht
+- Check-in: 15-21 Uhr | Check-out: bis 11:30 Uhr
+- Kostenloses WLAN und kostenlose Parkplätze
+- Wir akzeptieren Haustiere (vorherige Anfrage)
+- In der Nähe der riesigen Wellen von Praia do Norte (5 Min. mit dem Auto)
+- Sehenswürdigkeiten in der Nähe: Heiligtum von Fátima, Kloster Batalha, Alcobaça, São Pedro de Moel
+- Empfohlene Restaurants: O Casarão, Taberna do Terreiro, Mata Bicho
+
+Antworten Sie freundlich, kurz und hilfreich. Wenn Sie etwas Bestimmtes nicht wissen, seien Sie ehrlich."""
+    }
+    
+    system_prompt = system_prompts.get(user_lang, system_prompts["pt"])
+    
+    try:
+        response = requests.post(
+            GROQ_API_URL,
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "llama-3.3-70b-versatile",  # Modelo grátis e rápido
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": question}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 300
+            },
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data["choices"][0]["message"]["content"].strip()
+        else:
+            print(f"Groq API Error: {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"Groq API Exception: {e}")
+        return None
 
 # -----------------------------------------
 # Endpoints
 # -----------------------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_message = request.json.get("message", "").strip()
+    data = request.json
+    user_message = data.get("message", "").strip()
+    user_lang = data.get("lang", "pt")
     user_message_lower = user_message.lower()
     
-    # Encontrar match e detectar idioma
+    # 1. Tentar FAQ primeiro
     answer_pt, detected_lang = find_best_faq_match(user_message, user_message_lower)
+    target_lang = user_lang if user_lang else (detected_lang or "pt")
     
     if answer_pt:
-        # Traduzir resposta para o idioma detectado
-        translated_answer = translate_text(answer_pt, "pt", detected_lang)
-        return jsonify({"response": translated_answer})
+        translated_answer = translate_text(answer_pt, "pt", target_lang)
+        return jsonify({"response": translated_answer, "source": "faq"})
     
-    # Sem match → enviar para Google Sheets
+    # 2. Se não encontrou no FAQ, tentar Groq AI
+    ai_response = ask_groq_ai(user_message, target_lang)
+    
+    if ai_response:
+        return jsonify({"response": ai_response, "source": "ai"})
+    
+    # 3. Se AI não disponível, registar no Sheets
     try:
         requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message}, timeout=3)
     except:
         pass
     
-    # Fallback
-    fallback_lang = detect_language_from_sentence(user_message)
+    # 4. Fallback final
     fallback = "Pode repetir a sua questão? 😊"
-    translated_fallback = translate_text(fallback, "pt", fallback_lang)
-    return jsonify({"response": translated_fallback})
+    translated_fallback = translate_text(fallback, "pt", target_lang)
+    return jsonify({"response": translated_fallback, "source": "fallback"})
 
 @app.route("/health", methods=["GET"])
 def health():
