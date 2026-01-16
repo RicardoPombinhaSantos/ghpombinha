@@ -49,6 +49,8 @@ ATTRACTIONS:
 
 IMPORTANT:
 Always answer clearly, politely and concisely.
+Do not ask questions at the end of the answer.
+If the words are most of them in English, answer in English.
 """
     else:
         # System prompts por idioma (mantidos caso precises no futuro)
@@ -74,7 +76,8 @@ Fátima, Batalha, Alcobaça, Óbidos, Leiria, Ourém, Tomar
 Transporte: bus, taxi, Uber
 Restaurantes: O Veleiro, O Pescador, Tabernassa, Aki d'el Mar
 
-IMPORTANTE: Responda SEMPRE em PORTUGUÊS.""",
+IMPORTANTE: Responda SEMPRE em PORTUGUÊS.
+Não faças perguntas no fim da resposta.""",
 
             "en": """You are an assistant for accommodation in Nazaré, Portugal.
 Answer ONLY in ENGLISH.""",
