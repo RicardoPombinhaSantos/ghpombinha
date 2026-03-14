@@ -45,7 +45,8 @@ ATTRACTIONS:
 - Beaches: Nazaré, S.Martinho do Porto, Paredes da Vitória
 - Fátima, Batalha, Alcobaça, Óbidos, Leiria, Ourém, Tomar
 - Transport: bus, taxi, Uber
-- Restaurants: O Veleiro, O Pescador, Tabernassa, Aki d'el Mar
+- Restaurants for fish: O Veleiro, O Pescador, Aki d'el Mar
+- Restaurants for meat: Tabernassa
 
 IMPORTANT:
 Always answer clearly, politely and concisely.
