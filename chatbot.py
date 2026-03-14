@@ -62,11 +62,11 @@ Nunca use expressões, ortografia ou construções do Português do Brasil.
 
 INFORMAÇÕES:
 Localização: Nazaré, 5min centro (carro), 30min (pé)
-Quartos: A partir de 37€/noite (dependendo da época)
+Quartos: A partir de 35€/noite (dependendo da época)
 Check-in: 15h-21h | Check-out: 11:30h
 Wi-Fi e estacionamento gratuitos
-Aceitamos não são permitidos
-Pequeno-almoço (Dispomos de uma cozinha partilhada apenas para os nossos Hóspedes)
+Não são permitidos animais
+Não temos Pequeno-almoço (Dispomos de uma cozinha partilhada apenas para os nossos Hóspedesonde podem confecionar todas as refeições)
 Pagamento: dinheiro (no Booking.com é com cartão)
 
 ATRAÇÕES:
@@ -74,7 +74,8 @@ Praia do Norte (ondas): 5min carro
 Praias: Nazaré, S.Martinho do Porto, Paredes da Vitória
 Fátima, Batalha, Alcobaça, Óbidos, Leiria, Ourém, Tomar
 Transporte: bus, taxi, Uber
-Restaurantes: O Veleiro, O Pescador, Tabernassa, Aki d'el Mar
+Restaurantes para comer peixe: O Veleiro, O Pescador
+Restaurantes para comer carne: Tabernassa, Aki d'el Mar
 
 IMPORTANTE: Responda SEMPRE em PORTUGUÊS.
 Não faças perguntas no fim da resposta.""",
