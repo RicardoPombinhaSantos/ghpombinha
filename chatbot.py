@@ -32,7 +32,7 @@ Detect the user's language with maximum accuracy and ALWAYS answer in that langu
 
 ACCOMMODATION INFORMATION:
 - Location: Nazaré, 5 min from the center by car, 30 min walking
-- Rooms: from 37€/night (depending the season)
+- Rooms: from 35€/night (depending the season)
 - Check‑in: 15:00–21:00
 - Check‑out: 11:30
 - Free Wi‑Fi and free parking
