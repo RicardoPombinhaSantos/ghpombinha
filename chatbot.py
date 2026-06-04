@@ -6,183 +6,26 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# -----------------------------------------
+# CONFIGURAÇÃO GROQ API (GRATUITA)
+# -----------------------------------------
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
-NAZARE_LAT = 39.6045
-NAZARE_LON = -9.0642
-
-METEOBLUE_URL = "https://www.meteoblue.com/pt/tempo/semana/nazar%C3%A9_portugal_2266931"
-
-# -----------------------------------------
-# TEMPO (Open-Meteo, grátis, sem chave)
-# -----------------------------------------
-def get_weather_nazare():
-    try:
-        url = (
-            f"https://api.open-meteo.com/v1/forecast"
-            f"?latitude={NAZARE_LAT}&longitude={NAZARE_LON}"
-            f"&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode"
-            f"&timezone=Europe%2FLisbon&forecast_days=3"
-        )
-        r = requests.get(url, timeout=10)
-        print(f"DEBUG weather status: {r.status_code}")
-        if r.status_code != 200:
-            print(f"DEBUG weather response: {r.text}")
-            return None
-
-        d = r.json()["daily"]
-
-        def wmo_desc(code):
-            if code == 0: return "céu limpo ☀️"
-            elif code in [1, 2]: return "parcialmente nublado 🌤️"
-            elif code == 3: return "nublado ☁️"
-            elif code in [45, 48]: return "nevoeiro 🌫️"
-            elif code in [51, 53, 55, 61, 63, 65]: return "chuva 🌧️"
-            elif code in [71, 73, 75]: return "neve 🌨️"
-            elif code in [80, 81, 82]: return "aguaceiros 🌦️"
-            elif code in [95, 96, 99]: return "trovoada ⛈️"
-            else: return "variável"
-
-        days = []
-        for i in range(3):
-            days.append({
-                "date": d["time"][i],
-                "max": d["temperature_2m_max"][i],
-                "min": d["temperature_2m_min"][i],
-                "rain": d["precipitation_sum"][i],
-                "desc": wmo_desc(d["weathercode"][i])
-            })
-        print(f"DEBUG weather_data OK: {days}")
-        return days
-
-    except Exception as e:
-        print(f"Weather error: {e}")
-        return None
-
-
-# -----------------------------------------
-# ONDAS (Open-Meteo Marine, grátis, sem chave)
-# -----------------------------------------
-def get_waves_nazare():
-    try:
-        url = (
-            f"https://marine-api.open-meteo.com/v1/marine"
-            f"?latitude={NAZARE_LAT}&longitude={NAZARE_LON}"
-            f"&daily=wave_height_max,wave_period_max,wind_wave_height_max"
-            f"&timezone=Europe%2FLisbon&forecast_days=3"
-        )
-        r = requests.get(url, timeout=10)
-        print(f"DEBUG waves status: {r.status_code}")
-        if r.status_code != 200:
-            print(f"DEBUG waves response: {r.text}")
-            return None
-
-        d = r.json()["daily"]
-
-        days = []
-        for i in range(3):
-            height = d["wave_height_max"][i]
-            period = d["wave_period_max"][i]
-
-            # Classificação neutra — o Groq traduz para o idioma do utilizador
-            if height < 1.0:
-                surf_level = "small 🏊"
-            elif height < 2.5:
-                surf_level = "medium 🏄"
-            elif height < 5.0:
-                surf_level = "large 🌊"
-            else:
-                surf_level = "very large / dangerous - big wave only 🌊🔥"
-
-            days.append({
-                "date": d["time"][i],
-                "height": height,
-                "period": period,
-                "level": surf_level
-            })
-        print(f"DEBUG wave_data OK: {days}")
-        return days
-
-    except Exception as e:
-        print(f"Waves error: {e}")
-        return None
-
-
-# -----------------------------------------
-# Detetar se pergunta sobre tempo ou ondas
-# -----------------------------------------
-def detect_weather_or_waves(message):
-    msg = message.lower()
-
-    weather_keywords = [
-        "tempo", "weather", "temperatura", "chuva", "sol", "previsão",
-        "meteo", "météo", "clima", "forecast", "rain", "sunny", "cloudy",
-        "calor", "frio", "hot", "cold", "nublado", "vento", "wind",
-        "wetter", "tiempo", "lluvia"
-    ]
-    wave_keywords = [
-        "onda", "ondas", "wave", "waves", "surf", "swell", "praia do norte",
-        "altura", "big wave", "surfing", "mar", "sea", "ocean", "welle", "vague"
-    ]
-
-    has_weather = any(k in msg for k in weather_keywords)
-    has_waves = any(k in msg for k in wave_keywords)
-
-    return has_weather, has_waves
-
-
-# -----------------------------------------
-# Formatar contexto de tempo/ondas para o Groq
-# -----------------------------------------
-WEATHER_FALLBACK = {
-    "pt": f"NOTA INTERNA: Foi pedida informação sobre o tempo mas a API meteorológica não respondeu. Informa o utilizador que não foi possível obter os dados neste momento e sugere que consulte {METEOBLUE_URL}",
-    "en": f"INTERNAL NOTE: Weather was requested but the weather API did not respond. Tell the user you couldn't get the data right now and suggest they check {METEOBLUE_URL}",
-    "es": f"NOTA INTERNA: Se solicitó información del tiempo pero la API no respondió. Informa al usuario que no fue posible obtener los datos ahora mismo y sugiere que consulte {METEOBLUE_URL}",
-    "fr": f"NOTE INTERNE: La météo a été demandée mais l'API n'a pas répondu. Informe l'utilisateur que les données ne sont pas disponibles pour l'instant et suggère de consulter {METEOBLUE_URL}",
-    "it": f"NOTA INTERNA: È stata richiesta la previsione meteo ma l'API non ha risposto. Informa l'utente che i dati non sono disponibili al momento e suggerisci di consultare {METEOBLUE_URL}",
-    "de": f"INTERNER HINWEIS: Wetter wurde angefragt, aber die API hat nicht geantwortet. Teile dem Nutzer mit, dass die Daten gerade nicht verfügbar sind, und empfehle {METEOBLUE_URL}",
-}
-
-def format_weather_context(weather, waves, wants_weather=False):
-    context = ""
-
-    if weather:
-        context += "\n\nWEATHER FORECAST FOR NAZARÉ (next 3 days) — translate to the user's language:\n"
-        for d in weather:
-            context += (
-                f"- {d['date']}: {d['desc']}, "
-                f"max {d['max']}°C / min {d['min']}°C, "
-                f"rain {d['rain']}mm\n"
-            )
-    elif wants_weather:
-        # API falhou — instrução em inglês para o Groq adaptar ao idioma do utilizador
-        context += f"\n\nINTERNAL NOTE: Weather was requested but the API failed. Tell the user in their language that the data is unavailable and suggest {METEOBLUE_URL}\n"
-
-    if waves:
-        context += "\nWAVE FORECAST — PRAIA DO NORTE (next 3 days) — translate to the user's language:\n"
-        for d in waves:
-            context += (
-                f"- {d['date']}: max height {d['height']}m, "
-                f"period {d['period']}s — {d['level']}\n"
-            )
-
-    return context
-
-
 # -----------------------------------------
 # GROQ AI — DETEÇÃO AUTOMÁTICA DE IDIOMA
 # -----------------------------------------
-def ask_groq_ai(question, user_lang=None, extra_context=""):
+def ask_groq_ai(question, user_lang=None):
     """Usa Groq AI para responder perguntas com autodetecção de idioma"""
 
     if not GROQ_API_KEY:
         return None
 
+    # Se não houver idioma, pedir ao Groq para detectar automaticamente
     if user_lang is None:
-        system_prompt = f"""
+        system_prompt = """
 You are an assistant for a GuestHouse in Nazaré, Portugal.
 Your name is Pombinha.
 Detect the user's language with maximum accuracy and ALWAYS answer in that language.
@@ -213,12 +56,11 @@ If asked about rooms, don't say prices, send them to Booking.com or to contact u
 Always answer clearly, politely and concisely.
 Do not ask questions at the end of the answer.
 If the words are most of them in English, answer in English.
-If weather or wave data is provided below, use it to give an accurate and friendly answer in the user's language.
-{extra_context}
 """
     else:
+        # System prompts por idioma (mantidos caso precises no futuro)
         system_prompts = {
-            "pt": f"""Tu és uma assistente de uma GuestHouse na Nazaré, Portugal.
+            "pt": """Tu és uma assistente de uma GuestHouse na Nazaré, Portugal.
             O teu nome é Pombinha.
 IMPORTANTE:
 Responde SEMPRE em Português Europeu (PT‑PT). 
@@ -247,34 +89,22 @@ Restaurantes Marisco: Aki d'el Mar
 IMPORTANTE: Responda SEMPRE em PORTUGUÊS.
 Responde na Nazaré, nunca em Nazaré.
 Se perguntarem por quartos vagos, envia-os para booking.com ou contactar-nos directamente através do +351 91 055 86 86 ou pelo email guesthousepombinha@gmail.com.
-Não faças perguntas no fim da resposta.
-Se tiveres dados de tempo ou ondas abaixo, usa-os para responder com precisão.
-{extra_context}""",
+Não faças perguntas no fim da resposta.""",
 
-            "en": f"""You are an assistant for accommodation in Nazaré, Portugal.
-Answer ONLY in ENGLISH.
-If weather or wave data is provided below, use it to give an accurate and friendly answer.
-{extra_context}""",
+            "en": """You are an assistant for accommodation in Nazaré, Portugal.
+Answer ONLY in ENGLISH.""",
 
-            "es": f"""Eres asistente de alojamiento en Nazaré, Portugal.
-Responde SOLO en ESPAÑOL.
-Si hay datos de tiempo u olas abajo, úsalos para responder con precisión.
-{extra_context}""",
+            "es": """Eres asistente de alojamiento en Nazaré, Portugal.
+Responde SOLO en ESPAÑOL.""",
 
-            "fr": f"""Vous êtes assistant d'hébergement à Nazaré, Portugal.
-Répondez UNIQUEMENT en FRANÇAIS.
-Si des données météo ou de vagues sont fournies ci-dessous, utilisez-les pour répondre avec précision.
-{extra_context}""",
+            "fr": """Vous êtes assistant d'hébergement à Nazaré, Portugal.
+Répondez UNIQUEMENT en FRANÇAIS.""",
 
-            "it": f"""Sei assistente di alloggio a Nazaré, Portogallo.
-Rispondi SOLO in ITALIANO.
-Se sono forniti dati meteo o onde qui sotto, usali per rispondere con precisione.
-{extra_context}""",
+            "it": """Sei assistente di alloggio a Nazaré, Portogallo.
+Rispondi SOLO in ITALIANO.""",
 
-            "de": f"""Sie sind Assistent für Unterkunft in Nazaré, Portugal.
-Antworten Sie NUR auf DEUTSCH.
-Wenn unten Wetter- oder Wellendaten vorhanden sind, nutzen Sie diese für eine genaue Antwort.
-{extra_context}"""
+            "de": """Sie sind Assistent für Unterkunft in Nazaré, Portugal.
+Antworten Sie NUR auf DEUTSCH."""
         }
 
         system_prompt = system_prompts.get(user_lang, system_prompts["pt"])
@@ -327,14 +157,8 @@ def chat():
     # 2 — Forçar autodetecção do Groq
     user_lang = None
 
-    # 3 — Detetar se pergunta sobre tempo ou ondas e buscar dados
-    wants_weather, wants_waves = detect_weather_or_waves(user_message)
-    weather_data = get_weather_nazare() if wants_weather else None
-    wave_data = get_waves_nazare() if wants_waves else None
-    extra_context = format_weather_context(weather_data, wave_data, wants_weather=wants_weather)
-
-    # 4 — Tentar responder com Groq AI
-    ai_response = ask_groq_ai(user_message, user_lang, extra_context=extra_context)
+    # 3 — Tentar responder com Groq AI
+    ai_response = ask_groq_ai(user_message, user_lang)
 
     if ai_response:
         return jsonify({
@@ -343,7 +167,7 @@ def chat():
             "lang": "auto"
         })
 
-    # 5 — Fallback genérico
+    # 4 — Fallback genérico
     return jsonify({
         "response": "Desculpe, estou com dificuldades técnicas. Pode contactar-nos diretamente? +351 91 055 86 86 😊",
         "source": "fallback",
