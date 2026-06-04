@@ -6,26 +6,163 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# -----------------------------------------
-# CONFIGURAÇÃO GROQ API (GRATUITA)
-# -----------------------------------------
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
-# -----------------------------------------
-# GROQ AI — DETEÇÃO AUTOMÁTICA DE IDIOMA
-# -----------------------------------------
-def ask_groq_ai(question, user_lang=None):
-    """Usa Groq AI para responder perguntas com autodetecção de idioma"""
+# Coordenadas da Praia do Norte / Nazaré
+NAZARE_LAT = 39.6045
+NAZARE_LON = -9.0642
 
+# -----------------------------------------
+# TEMPO — Open-Meteo (grátis, sem chave)
+# -----------------------------------------
+def get_weather_nazare():
+    """Busca previsão do tempo para os próximos 3 dias em Nazaré"""
+    try:
+        url = (
+            f"https://api.open-meteo.com/v1/forecast"
+            f"?latitude={NAZARE_LAT}&longitude={NAZARE_LON}"
+            f"&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode"
+            f"&timezone=Europe%2FLisbon&forecast_days=3"
+        )
+        r = requests.get(url, timeout=5)
+        if r.status_code != 200:
+            return None
+
+        d = r.json()["daily"]
+
+        # WMO weather codes → descrição legível
+        def wmo_desc(code):
+            if code == 0: return "céu limpo ☀️"
+            elif code in [1, 2]: return "parcialmente nublado 🌤️"
+            elif code == 3: return "nublado ☁️"
+            elif code in [45, 48]: return "nevoeiro 🌫️"
+            elif code in [51, 53, 55, 61, 63, 65]: return "chuva 🌧️"
+            elif code in [71, 73, 75]: return "neve 🌨️"
+            elif code in [80, 81, 82]: return "aguaceiros 🌦️"
+            elif code in [95, 96, 99]: return "trovoada ⛈️"
+            else: return "variável"
+
+        days = []
+        for i in range(3):
+            days.append({
+                "date": d["time"][i],
+                "max": d["temperature_2m_max"][i],
+                "min": d["temperature_2m_min"][i],
+                "rain": d["precipitation_sum"][i],
+                "desc": wmo_desc(d["weathercode"][i])
+            })
+        return days
+
+    except Exception as e:
+        print(f"Weather error: {e}")
+        return None
+
+
+# -----------------------------------------
+# ONDAS — Open-Meteo Marine API (grátis, sem chave)
+# -----------------------------------------
+def get_waves_nazare():
+    """Busca previsão de ondas para os próximos 3 dias na Praia do Norte"""
+    try:
+        url = (
+            f"https://marine-api.open-meteo.com/v1/marine"
+            f"?latitude={NAZARE_LAT}&longitude={NAZARE_LON}"
+            f"&daily=wave_height_max,wave_period_max,wind_wave_height_max"
+            f"&timezone=Europe%2FLisbon&forecast_days=3"
+        )
+        r = requests.get(url, timeout=5)
+        if r.status_code != 200:
+            return None
+
+        d = r.json()["daily"]
+
+        days = []
+        for i in range(3):
+            height = d["wave_height_max"][i]
+            period = d["wave_period_max"][i]
+
+            # Classificação para surf
+            if height < 1.0:
+                surf_level = "pequenas 🏊"
+            elif height < 2.5:
+                surf_level = "médias — boas para surf 🏄"
+            elif height < 5.0:
+                surf_level = "grandes — surf avançado 🌊"
+            else:
+                surf_level = "muito grandes — perigosas, apenas para big wave 🌊🔥"
+
+            days.append({
+                "date": d["time"][i],
+                "height": height,
+                "period": period,
+                "level": surf_level
+            })
+        return days
+
+    except Exception as e:
+        print(f"Waves error: {e}")
+        return None
+
+
+# -----------------------------------------
+# DETEÇÃO: pergunta sobre tempo ou ondas?
+# -----------------------------------------
+def detect_weather_or_waves(message):
+    msg = message.lower()
+
+    weather_keywords = [
+        "tempo", "weather", "temperatura", "chuva", "sol", "previsão",
+        "meteo", "météo", "clima", "forecast", "rain", "sunny", "cloudy",
+        "calor", "frio", "hot", "cold", "nublado", "vento", "wind",
+        "wetter", "météo", "tiempo", "meteo", "lluvia"
+    ]
+    wave_keywords = [
+        "onda", "ondas", "wave", "waves", "surf", "swell", "praia do norte",
+        "altura", "big wave", "surfing", "mar", "sea", "ocean", "welle", "vague"
+    ]
+
+    has_weather = any(k in msg for k in weather_keywords)
+    has_waves = any(k in msg for k in wave_keywords)
+
+    return has_weather, has_waves
+
+
+# -----------------------------------------
+# FORMATAR DADOS PARA O GROQ
+# -----------------------------------------
+def format_weather_context(weather, waves):
+    context = ""
+
+    if weather:
+        context += "\n\nPREVISÃO DO TEMPO EM NAZARÉ (próximos 3 dias):\n"
+        for d in weather:
+            context += (
+                f"- {d['date']}: {d['desc']}, "
+                f"máx {d['max']}°C / mín {d['min']}°C, "
+                f"chuva {d['rain']}mm\n"
+            )
+
+    if waves:
+        context += "\nPREVISÃO DE ONDAS — PRAIA DO NORTE (próximos 3 dias):\n"
+        for d in waves:
+            context += (
+                f"- {d['date']}: altura máx {d['height']}m, "
+                f"período {d['period']}s — {d['level']}\n"
+            )
+
+    return context
+
+
+# -----------------------------------------
+# GROQ AI
+# -----------------------------------------
+def ask_groq_ai(question, user_lang=None, extra_context=""):
     if not GROQ_API_KEY:
         return None
 
-    # Se não houver idioma, pedir ao Groq para detectar automaticamente
-    if user_lang is None:
-        system_prompt = """
+    system_prompt = f"""
 You are an assistant for a GuestHouse in Nazaré, Portugal.
 Your name is Pombinha.
 Detect the user's language with maximum accuracy and ALWAYS answer in that language.
@@ -37,77 +174,26 @@ ACCOMMODATION INFORMATION:
 - Check‑out: 11:30
 - Free Wi‑Fi and free parking
 - Pets not allowed
-- Breakfast (We have a shared kitchen only for the Guests)
-- Payment: cash (in Booking.com is by card)
-- No rental bicicles
-- No Rental vehicles
+- Shared kitchen available for guests (no breakfast served)
+- Payment: cash at check-in (Booking.com accepts card)
+- No rental bicycles or vehicles
 
 ATTRACTIONS:
 - Praia do Norte (big waves): 5 min by car
 - Beaches: Nazaré, S.Martinho do Porto, Paredes da Vitória
 - Fátima, Batalha, Alcobaça, Óbidos, Leiria, Ourém, Tomar
 - Transport: bus, taxi, Uber
-- Restaurants for fish: O Veleiro, O Pescador
-- Restaurants for meat: Tabernassa
-- Restaurants sea food: Aki d'el Mar
+- Fish restaurants: O Veleiro, O Pescador
+- Meat restaurant: Tabernassa
+- Seafood restaurant: Aki d'el Mar
 
 IMPORTANT:
-If asked about rooms, don't say prices, send them to Booking.com or to contact us directly, to the number +351 91 055 86 86 or by email guesthousepombinha@gmail.com.
-Always answer clearly, politely and concisely.
-Do not ask questions at the end of the answer.
-If the words are most of them in English, answer in English.
+- If asked about available rooms, direct them to Booking.com or contact: +351 91 055 86 86 / guesthousepombinha@gmail.com
+- Answer clearly, politely and concisely
+- Do NOT ask questions at the end of the answer
+- If weather/wave data is provided below, use it to give an accurate, friendly answer
+{extra_context}
 """
-    else:
-        # System prompts por idioma (mantidos caso precises no futuro)
-        system_prompts = {
-            "pt": """Tu és uma assistente de uma GuestHouse na Nazaré, Portugal.
-            O teu nome é Pombinha.
-IMPORTANTE:
-Responde SEMPRE em Português Europeu (PT‑PT). 
-Nunca uses expressões, ortografia ou construções do Português do Brasil.
-Responde em feminino quando falares sobre a GuestHouse, que está situada na Nazaré.
-INFORMAÇÕES:
-Localização: Nazaré, 5min centro (carro), 30min (pé)
-Quartos: A partir de 35€/noite (dependendo da época)
-Check-in: 15h-21h | Check-out: 11:30h
-Wi-Fi e estacionamento gratuitos
-Não são permitidos animais
-Não temos Pequeno-almoço (Dispomos de uma cozinha partilhada apenas para os nossos Hóspedes onde podem confecionar todas as refeições)
-Pagamento: dinheiro no acto do check-in (no Booking.com é com cartão)
-Não temos bicicletas
-Não alugamos veiculos
-
-ATRAÇÕES:
-Praia do Norte (ondas): 5min carro
-Praias: Nazaré, S.Martinho do Porto, Paredes da Vitória
-Fátima, Batalha, Alcobaça, Óbidos, Leiria, Ourém, Tomar
-Transporte: bus, taxi, Uber
-Restaurantes para comer peixe: O Veleiro, O Pescador
-Restaurantes para comer carne: Tabernassa
-Restaurantes Marisco: Aki d'el Mar
-
-IMPORTANTE: Responda SEMPRE em PORTUGUÊS.
-Responde na Nazaré, nunca em Nazaré.
-Se perguntarem por quartos vagos, envia-os para booking.com ou contactar-nos directamente através do +351 91 055 86 86 ou pelo email guesthousepombinha@gmail.com.
-Não faças perguntas no fim da resposta.""",
-
-            "en": """You are an assistant for accommodation in Nazaré, Portugal.
-Answer ONLY in ENGLISH.""",
-
-            "es": """Eres asistente de alojamiento en Nazaré, Portugal.
-Responde SOLO en ESPAÑOL.""",
-
-            "fr": """Vous êtes assistant d'hébergement à Nazaré, Portugal.
-Répondez UNIQUEMENT en FRANÇAIS.""",
-
-            "it": """Sei assistente di alloggio a Nazaré, Portogallo.
-Rispondi SOLO in ITALIANO.""",
-
-            "de": """Sie sind Assistent für Unterkunft in Nazaré, Portugal.
-Antworten Sie NUR auf DEUTSCH."""
-        }
-
-        system_prompt = system_prompts.get(user_lang, system_prompts["pt"])
 
     try:
         response = requests.post(
@@ -123,14 +209,13 @@ Antworten Sie NUR auf DEUTSCH."""
                     {"role": "user", "content": question}
                 ],
                 "temperature": 0.7,
-                "max_tokens": 400
+                "max_tokens": 500
             },
             timeout=10
         )
 
         if response.status_code == 200:
-            data = response.json()
-            return data["choices"][0]["message"]["content"].strip()
+            return response.json()["choices"][0]["message"]["content"].strip()
         else:
             print(f"Groq API Error: {response.status_code}")
             return None
@@ -148,17 +233,23 @@ def chat():
     data = request.json
     user_message = data.get("message", "").strip()
 
-    # 1 — Guardar SEMPRE no Google Sheets
+    # 1 — Guardar no Google Sheets
     try:
         requests.post(GOOGLE_SHEETS_URL, json={"pergunta": user_message}, timeout=3)
     except:
         pass
 
-    # 2 — Forçar autodetecção do Groq
-    user_lang = None
+    # 2 — Detetar se pergunta sobre tempo ou ondas
+    wants_weather, wants_waves = detect_weather_or_waves(user_message)
 
-    # 3 — Tentar responder com Groq AI
-    ai_response = ask_groq_ai(user_message, user_lang)
+    weather_data = get_weather_nazare() if wants_weather else None
+    wave_data = get_waves_nazare() if wants_waves else None
+
+    # 3 — Formatar contexto extra para o Groq
+    extra_context = format_weather_context(weather_data, wave_data)
+
+    # 4 — Responder com Groq AI
+    ai_response = ask_groq_ai(user_message, extra_context=extra_context)
 
     if ai_response:
         return jsonify({
@@ -167,7 +258,7 @@ def chat():
             "lang": "auto"
         })
 
-    # 4 — Fallback genérico
+    # 5 — Fallback
     return jsonify({
         "response": "Desculpe, estou com dificuldades técnicas. Pode contactar-nos diretamente? +351 91 055 86 86 😊",
         "source": "fallback",
