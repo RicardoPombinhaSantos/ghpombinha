@@ -72,8 +72,8 @@ Quartos: A partir de 35€/noite (dependendo da época)
 Check-in: 15h-21h | Check-out: 11:30h
 Wi-Fi e estacionamento gratuitos
 Não são permitidos animais
-Não temos Pequeno-almoço (Dispomos de uma cozinha partilhada apenas para os nossos Hóspedesonde podem confecionar todas as refeições)
-Pagamento: dinheiro (no Booking.com é com cartão)
+Não temos Pequeno-almoço (Dispomos de uma cozinha partilhada apenas para os nossos Hóspedes onde podem confecionar todas as refeições)
+Pagamento: dinheiro no acto do check-in (no Booking.com é com cartão)
 Não temos bicicletas
 Não alugamos veiculos
 
