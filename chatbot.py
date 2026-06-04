@@ -169,7 +169,7 @@ def chat():
 
     # 4 — Fallback genérico
     return jsonify({
-        "response": "Desculpe, estou com dificuldades técnicas. Pode contactar-nos diretamente? 😊",
+        "response": "Desculpe, estou com dificuldades técnicas. Pode contactar-nos diretamente? +351 91 055 86 86 😊",
         "source": "fallback",
         "lang": "pt"
     })
