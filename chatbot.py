@@ -19,7 +19,7 @@ NAZARE_LAT = 39.6045
 NAZARE_LON = -9.0642
 
 # -----------------------------------------
-# NOVO — TEMPO (Open-Meteo, grátis, sem chave)
+# TEMPO (Open-Meteo, grátis, sem chave)
 # -----------------------------------------
 def get_weather_nazare():
     try:
@@ -63,7 +63,7 @@ def get_weather_nazare():
 
 
 # -----------------------------------------
-# NOVO — ONDAS (Open-Meteo Marine, grátis, sem chave)
+# ONDAS (Open-Meteo Marine, grátis, sem chave)
 # -----------------------------------------
 def get_waves_nazare():
     try:
@@ -107,7 +107,7 @@ def get_waves_nazare():
 
 
 # -----------------------------------------
-# NOVO — Detetar se pergunta sobre tempo ou ondas
+# Detetar se pergunta sobre tempo ou ondas
 # -----------------------------------------
 def detect_weather_or_waves(message):
     msg = message.lower()
@@ -130,9 +130,20 @@ def detect_weather_or_waves(message):
 
 
 # -----------------------------------------
-# NOVO — Formatar contexto de tempo/ondas para o Groq
+# Formatar contexto de tempo/ondas para o Groq
 # -----------------------------------------
-def format_weather_context(weather, waves):
+METEOBLUE_URL = "https://www.meteoblue.com/pt/tempo/semana/nazar%C3%A9_portugal_2266931"
+
+WEATHER_FALLBACK = {
+    "pt": f"NOTA INTERNA: Foi pedida informação sobre o tempo mas a API meteorológica não respondeu. Informa o utilizador que não foi possível obter os dados neste momento e sugere que consulte {METEOBLUE_URL}",
+    "en": f"INTERNAL NOTE: Weather was requested but the weather API did not respond. Tell the user you couldn't get the data right now and suggest they check {METEOBLUE_URL}",
+    "es": f"NOTA INTERNA: Se solicitó información del tiempo pero la API no respondió. Informa al usuario que no fue posible obtener los datos ahora mismo y sugiere que consulte {METEOBLUE_URL}",
+    "fr": f"NOTE INTERNE: La météo a été demandée mais l'API n'a pas répondu. Informe l'utilisateur que les données ne sont pas disponibles pour l'instant et suggère de consulter {METEOBLUE_URL}",
+    "it": f"NOTA INTERNA: È stata richiesta la previsione meteo ma l'API non ha risposto. Informa l'utente che i dati non sono disponibili al momento e suggerisci di consultare {METEOBLUE_URL}",
+    "de": f"INTERNER HINWEIS: Wetter wurde angefragt, aber die API hat nicht geantwortet. Teile dem Nutzer mit, dass die Daten gerade nicht verfügbar sind, und empfehle {METEOBLUE_URL}",
+}
+
+def format_weather_context(weather, waves, user_lang=None):
     context = ""
 
     if weather:
@@ -143,6 +154,9 @@ def format_weather_context(weather, waves):
                 f"máx {d['max']}°C / mín {d['min']}°C, "
                 f"chuva {d['rain']}mm\n"
             )
+    elif weather is None:
+        lang = user_lang or "pt"
+        context += f"\n\n{WEATHER_FALLBACK.get(lang, WEATHER_FALLBACK['en'])}\n"
 
     if waves:
         context += "\nPREVISÃO DE ONDAS — PRAIA DO NORTE (próximos 3 dias):\n"
@@ -157,7 +171,6 @@ def format_weather_context(weather, waves):
 
 # -----------------------------------------
 # GROQ AI — DETEÇÃO AUTOMÁTICA DE IDIOMA
-# (igual ao original, só acrescenta extra_context)
 # -----------------------------------------
 def ask_groq_ai(question, user_lang=None, extra_context=""):
     """Usa Groq AI para responder perguntas com autodetecção de idioma"""
@@ -311,11 +324,11 @@ def chat():
     # 2 — Forçar autodetecção do Groq
     user_lang = None
 
-    # 3 — NOVO: detetar se pergunta sobre tempo ou ondas e buscar dados
+    # 3 — Detetar se pergunta sobre tempo ou ondas e buscar dados
     wants_weather, wants_waves = detect_weather_or_waves(user_message)
     weather_data = get_weather_nazare() if wants_weather else None
     wave_data = get_waves_nazare() if wants_waves else None
-    extra_context = format_weather_context(weather_data, wave_data)
+    extra_context = format_weather_context(weather_data, wave_data, user_lang)
 
     # 4 — Tentar responder com Groq AI
     ai_response = ask_groq_ai(user_message, user_lang, extra_context=extra_context)
