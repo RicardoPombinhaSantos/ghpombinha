@@ -6,17 +6,15 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# -----------------------------------------
-# CONFIGURAÇÃO GROQ API (GRATUITA)
-# -----------------------------------------
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxb_0oe7Q8L8_Un01bZoTIiJIw0ndYIgo9j-9mx7VjbZFyZKXW8GxoPj9fGI-6QnCslOw/exec"
 
-# Coordenadas da Praia do Norte / Nazaré
 NAZARE_LAT = 39.6045
 NAZARE_LON = -9.0642
+
+METEOBLUE_URL = "https://www.meteoblue.com/pt/tempo/semana/nazar%C3%A9_portugal_2266931"
 
 # -----------------------------------------
 # TEMPO (Open-Meteo, grátis, sem chave)
@@ -29,8 +27,10 @@ def get_weather_nazare():
             f"&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode"
             f"&timezone=Europe%2FLisbon&forecast_days=3"
         )
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=10)
+        print(f"DEBUG weather status: {r.status_code}")
         if r.status_code != 200:
+            print(f"DEBUG weather response: {r.text}")
             return None
 
         d = r.json()["daily"]
@@ -55,6 +55,7 @@ def get_weather_nazare():
                 "rain": d["precipitation_sum"][i],
                 "desc": wmo_desc(d["weathercode"][i])
             })
+        print(f"DEBUG weather_data OK: {days}")
         return days
 
     except Exception as e:
@@ -73,8 +74,10 @@ def get_waves_nazare():
             f"&daily=wave_height_max,wave_period_max,wind_wave_height_max"
             f"&timezone=Europe%2FLisbon&forecast_days=3"
         )
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=10)
+        print(f"DEBUG waves status: {r.status_code}")
         if r.status_code != 200:
+            print(f"DEBUG waves response: {r.text}")
             return None
 
         d = r.json()["daily"]
@@ -84,14 +87,15 @@ def get_waves_nazare():
             height = d["wave_height_max"][i]
             period = d["wave_period_max"][i]
 
+            # Classificação neutra — o Groq traduz para o idioma do utilizador
             if height < 1.0:
-                surf_level = "pequenas 🏊"
+                surf_level = "small 🏊"
             elif height < 2.5:
-                surf_level = "médias — boas para surf 🏄"
+                surf_level = "medium 🏄"
             elif height < 5.0:
-                surf_level = "grandes — surf avançado 🌊"
+                surf_level = "large 🌊"
             else:
-                surf_level = "muito grandes — perigosas, apenas para big wave 🌊🔥"
+                surf_level = "very large / dangerous - big wave only 🌊🔥"
 
             days.append({
                 "date": d["time"][i],
@@ -99,6 +103,7 @@ def get_waves_nazare():
                 "period": period,
                 "level": surf_level
             })
+        print(f"DEBUG wave_data OK: {days}")
         return days
 
     except Exception as e:
@@ -132,8 +137,6 @@ def detect_weather_or_waves(message):
 # -----------------------------------------
 # Formatar contexto de tempo/ondas para o Groq
 # -----------------------------------------
-METEOBLUE_URL = "https://www.meteoblue.com/pt/tempo/semana/nazar%C3%A9_portugal_2266931"
-
 WEATHER_FALLBACK = {
     "pt": f"NOTA INTERNA: Foi pedida informação sobre o tempo mas a API meteorológica não respondeu. Informa o utilizador que não foi possível obter os dados neste momento e sugere que consulte {METEOBLUE_URL}",
     "en": f"INTERNAL NOTE: Weather was requested but the weather API did not respond. Tell the user you couldn't get the data right now and suggest they check {METEOBLUE_URL}",
@@ -143,27 +146,27 @@ WEATHER_FALLBACK = {
     "de": f"INTERNER HINWEIS: Wetter wurde angefragt, aber die API hat nicht geantwortet. Teile dem Nutzer mit, dass die Daten gerade nicht verfügbar sind, und empfehle {METEOBLUE_URL}",
 }
 
-def format_weather_context(weather, waves, user_lang=None):
+def format_weather_context(weather, waves, wants_weather=False):
     context = ""
 
     if weather:
-        context += "\n\nPREVISÃO DO TEMPO EM NAZARÉ (próximos 3 dias):\n"
+        context += "\n\nWEATHER FORECAST FOR NAZARÉ (next 3 days) — translate to the user's language:\n"
         for d in weather:
             context += (
                 f"- {d['date']}: {d['desc']}, "
-                f"máx {d['max']}°C / mín {d['min']}°C, "
-                f"chuva {d['rain']}mm\n"
+                f"max {d['max']}°C / min {d['min']}°C, "
+                f"rain {d['rain']}mm\n"
             )
-    elif weather is None:
-        lang = user_lang or "pt"
-        context += f"\n\n{WEATHER_FALLBACK.get(lang, WEATHER_FALLBACK['en'])}\n"
+    elif wants_weather:
+        # API falhou — instrução em inglês para o Groq adaptar ao idioma do utilizador
+        context += f"\n\nINTERNAL NOTE: Weather was requested but the API failed. Tell the user in their language that the data is unavailable and suggest {METEOBLUE_URL}\n"
 
     if waves:
-        context += "\nPREVISÃO DE ONDAS — PRAIA DO NORTE (próximos 3 dias):\n"
+        context += "\nWAVE FORECAST — PRAIA DO NORTE (next 3 days) — translate to the user's language:\n"
         for d in waves:
             context += (
-                f"- {d['date']}: altura máx {d['height']}m, "
-                f"período {d['period']}s — {d['level']}\n"
+                f"- {d['date']}: max height {d['height']}m, "
+                f"period {d['period']}s — {d['level']}\n"
             )
 
     return context
@@ -210,7 +213,7 @@ If asked about rooms, don't say prices, send them to Booking.com or to contact u
 Always answer clearly, politely and concisely.
 Do not ask questions at the end of the answer.
 If the words are most of them in English, answer in English.
-If weather or wave data is provided below, use it to give an accurate and friendly answer.
+If weather or wave data is provided below, use it to give an accurate and friendly answer in the user's language.
 {extra_context}
 """
     else:
@@ -328,7 +331,7 @@ def chat():
     wants_weather, wants_waves = detect_weather_or_waves(user_message)
     weather_data = get_weather_nazare() if wants_weather else None
     wave_data = get_waves_nazare() if wants_waves else None
-    extra_context = format_weather_context(weather_data, wave_data, user_lang)
+    extra_context = format_weather_context(weather_data, wave_data, wants_weather=wants_weather)
 
     # 4 — Tentar responder com Groq AI
     ai_response = ask_groq_ai(user_message, user_lang, extra_context=extra_context)
